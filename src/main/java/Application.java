@@ -10,24 +10,25 @@ public class Application extends JFrame implements ActionListener {
     JPanel jPanel1 = new JPanel();
     JPanel jPanel2 = new JPanel();
     int side = 40;
+    int dimen = 800;
     JButton b[][];
 
-    ArrayList<int[]> people = new ArrayList();
-    ArrayList<int[]> kings = new ArrayList();
+    ArrayList<int[]> current = new ArrayList();
+    ArrayList<int[]> next = new ArrayList();
 
     public static void main(String[] args) {
-        Application obj = new Application();
+        new Application();
     }
 
     private Application() {
         super("Conway's Game of Life");
-        setSize(800, 900);
+        setSize(dimen, dimen + 100);
         setResizable(false);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         jPanel.setLayout(new BorderLayout());
         jPanel1.setLayout(new GridLayout(side, side, 0, 0));
-        jPanel1.setPreferredSize(new Dimension(800, 800));
+        jPanel1.setPreferredSize(new Dimension(dimen, dimen));
 
         b = new JButton[side][side];
 
@@ -39,6 +40,7 @@ public class Application extends JFrame implements ActionListener {
                 jPanel1.add(b[i][j]);
             }
         }
+
         jPanel2.setLayout(new BorderLayout());
         JButton start = new JButton();
         start.setText("Start");
@@ -59,14 +61,13 @@ public class Application extends JFrame implements ActionListener {
             }
         });
 
-        jPanel2.setPreferredSize(new Dimension(800, 100));
+        jPanel2.setPreferredSize(new Dimension(dimen, 100));
 
         jPanel.add(jPanel1, BorderLayout.NORTH);
         jPanel.add(jPanel2, BorderLayout.SOUTH);
         add(jPanel);
 
         setVisible(true);
-        System.out.println("Running");
     }
 
     private void init() {
@@ -75,7 +76,7 @@ public class Application extends JFrame implements ActionListener {
                 b[i][j].removeActionListener(this);
                 if (b[i][j].getBackground() == Color.BLACK) {
                     int temp[] = {i, j};
-                    people.add(temp);
+                    current.add(temp);
                 }
             }
         }
@@ -121,36 +122,36 @@ public class Application extends JFrame implements ActionListener {
     private void enqueue(int p, int q) {
         int n = neighbours(p, q);
         int temp[] = {p, q};
-        if (n == 3 && !listContains(kings, temp)) {
-            kings.add(temp);
+        if (n == 3 && !listContains(temp)) {
+            next.add(temp);
         }
     }
 
     private void play() {
-        while (!people.isEmpty()) {
+        while (!current.isEmpty()) {
 
-            kings.clear();
+            next.clear();
             int n = 0;
             int x = 0, y = 0;
-            for (int i = 0; i < people.size(); i++) {
-                x = people.get(i)[0];
-                y = people.get(i)[1];
+            for (int i = 0; i < current.size(); i++) {
+                x = current.get(i)[0];
+                y = current.get(i)[1];
                 n = neighbours(x, y);
                 if (n == 2 || n == 3) {
-                    kings.add(people.get(i));
+                    next.add(current.get(i));
                 }
 
                 newLife(x, y);
             }
-            people.clear();
-            people = (ArrayList<int[]>) kings.clone();
+            current.clear();
+            current = (ArrayList<int[]>) next.clone();
 
             int temp[] = {0, 0};
             for (int i = 0; i < side; i++) {
                 for (int j = 0; j < side; j++) {
                     temp[0] = i;
                     temp[1] = j;
-                    if (listContains(kings, temp)) {
+                    if (listContains(temp)) {
                         b[i][j].setBackground(Color.BLACK);
                     } else {
                         b[i][j].setBackground(Color.WHITE);
@@ -162,8 +163,8 @@ public class Application extends JFrame implements ActionListener {
         }
     }
 
-    private boolean listContains(ArrayList<int[]> list, int[] query) {
-        for (int[] arr : kings) {
+    private boolean listContains(int[] query) {
+        for (int[] arr : next) {
             if (arr[0] == query[0] && arr[1] == query[1]) {
                 return true;
             }
